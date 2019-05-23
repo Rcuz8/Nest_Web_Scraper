@@ -89,6 +89,7 @@ try:
     password = 'mypassword'
 
     import urllib.request
+    import ssl
 
     opener = urllib.request.build_opener()
     print("Cookies: ", headers["Cookie"])
@@ -107,5 +108,3 @@ try:
 
 except ValueError:
     print("Could not decode Second JSON response")
-
-
