@@ -1,49 +1,17 @@
-# importing the requests library
 import requests
+from bs4 import BeautifulSoup as bs
+import json
+import urllib.request
+import ssl
 
-# def main():
-#
-#     try :
-#
-#         # http://d8b674b7.ngrok.io?id=*&name=Ryan+Cocuzzo
-#
-#         # api-endpoint
-#         URL = "http://d8b674b7.ngrok.io"  # "localhost:1234"
-#
-#         query_str = "/query_from_name"
-#
-#         URL += query_str
-#
-#         # location given here
-#         name = "Ryan Cocuzzo"
-#
-#         id = "*"
-#         # defining a params dict for the parameters to be sent to the API
-#         PARAMS = {'name': name, 'id': id}
-#
-#         # sending get request and saving the response as response object
-#         r = requests.get(url=URL, params=PARAMS)
-#
-#         print(r)
-#         # # extracting data in json format
-#         # data = r.json()
-#         #
-#         # print(data)
-#
-#     except NameError as error:
-#
-#         print("There was an error: ", error)
-#
-#
-# main()
-
+# generic cookies
 x = {"known_bucket_types":["buckets","delayed_topaz","demand_response","device","device_alert_dialog","geofence_info","kryptonite","link","message","message_center","metadata","occupancy","quartz","safety","rcs_settings","safety_summary","schedule","shared","structure","structure_history","structure_metadata","topaz","topaz_resource","track","trip","tuneups","user","user_alert_dialog","user_settings","where","widget_track"],"known_bucket_versions":[]}
 
-import json
-
+# initial url
 url1 = "https://home.nest.com/session"
-d = {"email": "ryan.cocuzzo@gmail.com", "password": "Ryancocuzzo8"}
-
+#fill in your info
+d = {"email": "ENTER USERNAME", "password": "ENTER PASSWORD"}
+# establish the headers we're sending over
 headers={
     "Accept": "*/*",
     "content-type":"application/json",
@@ -57,22 +25,37 @@ headers={
     "X-Requested-With": "XMLHttpRequest",
 }
 
-r = requests.post(url=url1, headers=headers, json=d).json() # Response: 400 Bad request
-print(r)
+# Start requests!!
+
+# Req 1
+r = requests.post(url=url1, headers=headers, json=d).json()
+print(r) #print it's JSON
+
+#Not sure if this is necessary, but included it for good measure
 url2_ok = "https://home.nest.com/js/_vendors_/lib/phoenix-sdk/sdk-d4875ffcb3865568f87f.js "
 r12b = requests.get(url=url2_ok)
 print(r12b)
+
+# keep pulling info & using it as params
 params3 = r["user"][-8:]
 headers["Authorization"] = "Basic " + r['access_token']
+
+# print the new important info we get
 print(headers["Authorization"])
 # print(params3)
+
+# anooothhherrr one
 url3 = "https://home.nest.com/api/0.1/user/"+ params3 + "/app_launch"
 print(url3)
 r2 = requests.post(url=url3, params=x, headers=headers, json=x)
 print(r2)
+
+
 try:
     b = r2.json()
     print(b)
+
+    # fourth time gonna be the charm??
     url4 = "https://home.nest.com/dropcam/api/login"
     acc_tkn = r['access_token']
     url_addtl_data = b["updated_buckets"][0]["object_key"][18:]
@@ -83,28 +66,25 @@ try:
     session_tkn = r3[0]["session_token"]
     print(r3)
 
-    #import urllib, urllib2, cookielib
 
-    username = 'myuser'
-    password = 'mypassword'
-
-    import urllib.request
-    import ssl
-
+    # Boom, we're finally here!!
     opener = urllib.request.build_opener()
     print("Cookies: ", headers["Cookie"])
     opener.addheaders.append(('Cookie', headers["Cookie"]))
     f = opener.open("https://home.nest.com/home/"+url_addtl_data)
-    print(f)
-    # cj = cookielib.CookieJar()
-    # opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-    # login_data = urllib.urlencode({'username': username, 'j_password': password})
-    # opener.open('http://www.example.com/login.php', login_data)
-    # resp = opener.open('http://www.example.com/hiddenpage.php')
-    # print
-    # resp.read()
+    readible_nest_unlocked = f.read()
+
+    soup = bs(readible_nest_unlocked, features="html.parser")  # make BeautifulSoup
+    prettyHTML = soup.prettify()  # prettify the html
+
+    #finally... let's see what we're looking at
 
 
+    # for good measure..
+    print("")
+
+    # Here it is..
+    print(prettyHTML)
 
 except ValueError:
-    print("Could not decode Second JSON response")
+    print("Could not decode some JSON response")
